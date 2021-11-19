@@ -29,6 +29,8 @@ def virtualize(filepath):
             plt.plot(df[col], label="Raw Data") # Plot this data.
             plt.plot(df[col].mean(), color="black", label="Rolling Mean")
             plt.plot(rollstd[col], color="red", label="Rolling Std")
+            plt.ylabel("uT")
+            plt.xlabel("time (ms)")
             plt.legend(loc='best')
             plt.title(col)
             plt.show() # Show this given plot.
