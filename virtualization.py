@@ -3,7 +3,7 @@ from nptdms import TdmsFile
 import numpy as np
 import pandas as pd
 
-# Bokeh plots for viewing data.
+# Plotting.
 import matplotlib.pyplot as plt
 
 def virtualize(filepath):
