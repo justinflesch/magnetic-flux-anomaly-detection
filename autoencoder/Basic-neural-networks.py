@@ -17,22 +17,21 @@ matplotlib.rc('font', **font)
 # GLOBAL PARAMETERS FOR STOCHASTIC GRADIENT DESCENT
 # (we won't neccessarily be adjusting all of these)
 np.random.seed(0)
-step_size = 0.01
+# step_size = 0.01 REDACTED
 batch_size = 200
 max_epochs = 10000
 
 # new hyperparameters
-# hyperparameter tuple = {(activation, width, step_size)}
-# EXAMPLE: hp_tuple = {("ReLU", 16, 0.01), ("Sigmoid", 16, 0.01)} # make two layer neural network with two different activation functions
+# hyperparameter tuple = {(activation_callback, width, step_size)}
+# EXAMPLE: hp_tuple = {(LinearLayer, 16, 0.01), (ReLU, 16, 0.01), (LinearLayer, 16, 0.01)} # make two layer neural network with two different activation functions
 
 # GLOBAL PARAMETERS FOR NETWORK ARCHITECTURE
-number_of_layers = 2
-width_of_layers = 16  # only matters if number of layers > 1
-activation = "ReLU" if True else "Sigmoid" 
+number_of_layers = 2 # REDACTED
+width_of_layers = 16  # only matters if number of layers > 1 REDACTED
+# activation = "ReLU" if True else "Sigmoid" REDACTED
+# create an dictionary with it's associated callback
 
 def main():
-
-  
 
   highest_seed = 0
   highest_acc = 0
@@ -46,8 +45,10 @@ def main():
   # Build a network with input feature dimensions, output feature dimension,
   # hidden dimension, and number of layers as specified below
   print("INPUT DIM:", X_train.shape[1])
-  net = FeedForwardNeuralNetwork(X_train.shape[1],10,width_of_layers,number_of_layers, activation=activation)
-
+  hp_tuple = {(LinearLayer, X_train.shape[1], 0.01), (ReLU, 1024, 0.01), (LinearLayer, 10, 0.01)}
+#   net = FeedForwardNeuralNetwork(X_train.shape[1],10,width_of_layers,number_of_layers, activation=activation)
+  net = FeedForwardNeuralNetwork(hp_tuple)
+  return 
   # Some lists for book-keeping for plotting later
   losses = []
   val_losses = []
@@ -152,7 +153,8 @@ def main():
 
 
 
- 
+
+
   # j=0
 
   # lossFunc = CrossEntropySoftmax()
@@ -189,33 +191,39 @@ def main():
 class LinearLayer:
 
   # Initialize our layer with (input_dim, output_dim) weight matrix and a (1,output_dim) bias vector
-  def __init__(self, input_dim, output_dim):
+  def __init__(self, input_dim, output_dim, step_size):
     self.weights = np.random.randn(input_dim, output_dim)* np.sqrt(2. / input_dim)
     self.bias = np.ones( (1,output_dim) )*0.5
+    self.step_size = step_size
 
   # During the forward pass, we simply compute Xw+b
   def forward(self, input):
     self.input = input #Storing X
     return  self.input@self.weights + self.bias
 
-
   def backward(self, grad):
     self.grad_weights = np.transpose(self.input)@grad
     self.grad_bias = np.sum(grad, axis = 0)
     return grad@np.transpose(self.weights)
     
-  def step(self, step_size):
-    self.weights -= step_size*self.grad_weights
-    self.bias -= step_size*self.grad_bias
-
-
+  def step(self):
+    self.weights -= self.step_size*self.grad_weights
+    self.bias -= self.step_size*self.grad_bias
 
 
 # 2 rens, 128, 0.1, 5, seed 102
 
 class FeedForwardNeuralNetwork:
 
-  def __init__(self, input_dim, output_dim, hidden_dim, num_layers, activation="ReLU"):
+  def __init__(self,layer_table):
+
+
+    # odd values of "i" must be linearLayers
+    for i in range(layer_table):
+    # append the hidden layer activation function
+        self.layers.append(LinearLayer(layer_table[i][1], layer_table[i][1], layer_table[i][2])) if i % 2 == 1 else self.layers.append(layer_table[i][0]())
+        
+  
 
     # if num_layers == 1:
     #   self.layers = [LinearLayer(input_dim, output_dim)]
@@ -228,14 +236,36 @@ class FeedForwardNeuralNetwork:
     #   self.layers.append(LinearLayer(hidden_dim, output_dim))
 
     # create custom layers
-    self.layers = [LinearLayer(input_dim, 1024)]
+    # self.layers = [LinearLayer(input_dim, 1024)]
 
-    self.layers.append(ReLU())
-    self.layers.append(LinearLayer(1024, 1024))
-    self.layers.append(ReLU())
-    self.layers.append(LinearLayer(1024, 1024))
-    self.layers.append(Sigmoid())
-    self.layers.append(LinearLayer(1024, output_dim))
+    # self.layers.append(ReLU())
+    # self.layers.append(LinearLayer(1024, 1024))
+    # self.layers.append(ReLU())
+    # self.layers.append(LinearLayer(1024, 1024))
+    # self.layers.append(Sigmoid())
+    # self.layers.append(LinearLayer(128, 128))
+    # self.layers.append(Sigmoid())
+    # self.layers.append(LinearLayer(128, 128))
+    # self.layers.append(Sigmoid())
+    # self.layers.append(LinearLayer(128, 128))
+    # self.layers.append(Sigmoid())
+    # self.layers.append(LinearLayer(128, 128))
+    # self.layers.append(Sigmoid())
+    # self.layers.append(LinearLayer(128, 128))
+    # self.layers.append(Sigmoid())
+    # self.layers.append(LinearLayer(128, 128))
+    # self.layers.append(Sigmoid())
+    # self.layers.append(LinearLayer(128, 128))
+    # self.layers.append(Sigmoid())
+    # self.layers.append(LinearLayer(128, 128))
+    # self.layers.append(Sigmoid())
+    # self.layers.append(LinearLayer(128, 128))
+
+    # self.layers.append(Sigmoid())
+
+
+
+    # self.layers.append(LinearLayer(1024, output_dim))
 
   def forward(self, X):
     for layer in self.layers:
@@ -288,6 +318,12 @@ class ReLU:
   # No parameters so nothing to do during a gradient descent step
   def step(self,step_size):
     return
+
+# create an dictionary with it's associated callback
+activation_callback = {
+  "ReLU": ReLU,
+  "Sigmoid": Sigmoid
+}
 
 
 
@@ -342,7 +378,7 @@ def evaluateValidation(model, X_val, Y_val, batch_size):
 
 
 #####################################################
-# Utility Functions for Loading and Displaying Data
+# Utility Functions for Loading and Displaying Data #
 #####################################################
 def loadData(normalize = True):
   train = np.loadtxt("mnist_small_train.csv", delimiter=",", dtype=np.float64)
