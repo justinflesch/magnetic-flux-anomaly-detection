@@ -45,7 +45,10 @@ def main():
   # Build a network with input feature dimensions, output feature dimension,
   # hidden dimension, and number of layers as specified below
   print("INPUT DIM:", X_train.shape[1])
-  hp_tuple = {(LinearLayer, X_train.shape[1], 0.01), (ReLU, 1024, 0.01), (LinearLayer, 10, 0.01)}
+  hp_tuple = [(LinearLayer, X_train.shape[1], 0.01), (ReLU, 1024, 0.01), (LinearLayer, 10, 0.01)]
+
+  for i in range(len(hp_tuple)):
+    print(hp_tuple[i][0].__name__)
 #   net = FeedForwardNeuralNetwork(X_train.shape[1],10,width_of_layers,number_of_layers, activation=activation)
   net = FeedForwardNeuralNetwork(hp_tuple)
   return 
@@ -215,13 +218,19 @@ class LinearLayer:
 
 class FeedForwardNeuralNetwork:
 
-  def __init__(self,layer_table):
+  def __init__(self, layer_table):
 
-
+    # add the first layer
+    self.layers = [LinearLayer(layer_table[0][1], layer_table[2][1], layer_table[0][2])]
     # odd values of "i" must be linearLayers
-    for i in range(layer_table):
+    for i in range(1, len(layer_table)):
     # append the hidden layer activation function
-        self.layers.append(LinearLayer(layer_table[i][1], layer_table[i][1], layer_table[i][2])) if i % 2 == 1 else self.layers.append(layer_table[i][0]())
+      self.layers.append(LinearLayer(layer_table[i][1], layer_table[i-2][1], layer_table[i][2])) if i % 2 == 0 else self.layers.append(layer_table[i][0]())
+    
+    #append the last layer
+    # check if it works
+    for i in range(len(self.layers)):
+      print(type(self.layers[i]))
         
   
 
