@@ -17,18 +17,13 @@ matplotlib.rc('font', **font)
 # GLOBAL PARAMETERS FOR STOCHASTIC GRADIENT DESCENT
 # (we won't neccessarily be adjusting all of these)
 np.random.seed(0)
-# step_size = 0.01 REDACTED
-batch_size = 200
-max_epochs = 10000
+batch_size = 200 # the batch size for stochastic gradient descent
+max_epochs = 10000 # number of total epochs to train the neural network
 
 # new hyperparameters
 # hyperparameter tuple = {(activation_callback, width, step_size)}
 # EXAMPLE: hp_tuple = {(LinearLayer, 16, 0.01), (ReLU, 16, 0.01), (LinearLayer, 16, 0.01)} # make two layer neural network with two different activation functions
 
-# GLOBAL PARAMETERS FOR NETWORK ARCHITECTURE
-number_of_layers = 2 # REDACTED
-width_of_layers = 16  # only matters if number of layers > 1 REDACTED
-# activation = "ReLU" if True else "Sigmoid" REDACTED
 # create an dictionary with it's associated callback
 
 def main():
@@ -41,7 +36,6 @@ def main():
   # Load data and display an example
   displayExample(X_train[np.random.randint(0,len(X_train))])
 
-
   # Build a network with input feature dimensions, output feature dimension,
   # hidden dimension, and number of layers as specified below
   print("INPUT DIM:", X_train.shape[1])
@@ -51,19 +45,11 @@ def main():
     print(hp_tuple[i][0].__name__)
 #   net = FeedForwardNeuralNetwork(X_train.shape[1],10,width_of_layers,number_of_layers, activation=activation)
   net = FeedForwardNeuralNetwork(hp_tuple)
-  return 
   # Some lists for book-keeping for plotting later
   losses = []
   val_losses = []
   accs = []
   val_accs = []
-
-
-  #testing stuff
-  # step_size = 0.1
-  # batch_size = 10
-  # old_acc = 0
-  # new_acc = 0
 
   # Loss function
   lossFunc = CrossEntropySoftmax()
@@ -79,6 +65,7 @@ def main():
     j = 0
     acc_running = loss_running = 0
 
+    # training the back size (increment j by batch size)
     while j < len(X_train):
 
       # Select the members of this random batch
@@ -99,7 +86,7 @@ def main():
       net.backward(loss_grad)
 
       # Take a step of gradient descent
-      net.step(step_size)
+      net.step()
       # print("step_size", step_size)
 
       #Record losses and accuracy then move to next batch
@@ -110,14 +97,10 @@ def main():
 
       j+=batch_size
 
-
     # Evaluate performance on validation. This function looks very similar to the training loop above, 
     vloss, vacc = evaluateValidation(net, X_val, Y_val, batch_size)
     val_losses.append(vloss)
     val_accs.append(vacc)
-
-    # step_size = step_size - 0.01 if step_size > 0 else 0
-    # print(step_size)
     
     # Print out the average stats over this epoch
     logging.info("[Epoch {:3}]   Loss:  {:8.4}     Train Acc:  {:8.4}%      Val Acc:  {:8.4}%".format(i,loss_running/len(X_train), acc_running / len(X_train)*100,vacc*100))
@@ -127,10 +110,9 @@ def main():
     #   with open("FINAL", "a") as f:
     #     f.write("[Rand:{:3}] [Epoch {:3}]   Loss:  {:8.4}     Train Acc:  {:8.4}%      Val Acc:  {:8.4}%\n".format(r, i,loss_running/len(X_train), acc_running / len(X_train)*100,vacc*100))
     
-    print(step_size, batch_size, highest_acc)
-
-  return         
-
+    print(batch_size, highest_acc)
+    
+  # calculate cross-entropy loss
   fig, ax1 = plt.subplots(figsize=(16,9))
   color = 'tab:red'
   ax1.plot(range(len(losses)), losses, c=color, alpha=0.25, label="Train Loss")
@@ -142,6 +124,7 @@ def main():
 
   ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
+  # calculate the accuracy
   color = 'tab:blue'
   ax2.plot(range(len(losses)), accs, c=color, label="Train Acc.", alpha=0.25)
   ax2.plot([np.ceil((i+1)*len(X_train)/batch_size) for i in range(len(val_accs))], val_accs,c="blue", label="Val. Acc.")
@@ -154,30 +137,8 @@ def main():
   ax2.legend(loc="center right")
   plt.show()
 
-
-
-
-
-  # j=0
-
-  # lossFunc = CrossEntropySoftmax()
-
-  # while j < len(X_test):
-    # b = min(batch_size, len(X_test)-j)
-  # X_batch = X_test[j:j+b]
-    # Y_batch = Y_val[j:j+b].astype(np.int)
-    
+  # test performance of the neural network with output
   logits = net.forward(X_test)
-    # loss = lossFunc.forward(logits, Y_batch)
-    # acc = np.mean( np.argmax(logits,axis=1)[:,np.newaxis] == Y_batch)
-
-    # val_loss_running += loss*b
-    # val_acc_running += acc*b
-        
-    # j+=batch_size
-
-  # return val_loss_running/len(X_val), val_acc_running/len(X_val)
-
 
   print(np.argmax(logits,axis=1)[:,np.newaxis])
   test_Y = np.argmax(logits,axis=1)[:,np.newaxis]
@@ -231,51 +192,7 @@ class FeedForwardNeuralNetwork:
     # check if it works
     for i in range(len(self.layers)):
       print(type(self.layers[i]))
-        
-  
-
-    # if num_layers == 1:
-    #   self.layers = [LinearLayer(input_dim, output_dim)]
-    # else:
-    #   self.layers = [LinearLayer(input_dim, hidden_dim)]
-    #   self.layers.append(Sigmoid() if activation=="Sigmoid" else ReLU())
-    #   for i in range(num_layers-2):
-    #     self.layers.append(LinearLayer(hidden_dim, hidden_dim))
-    #     self.layers.append(Sigmoid() if activation=="Sigmoid" else ReLU())
-    #   self.layers.append(LinearLayer(hidden_dim, output_dim))
-
-    # create custom layers
-    # self.layers = [LinearLayer(input_dim, 1024)]
-
-    # self.layers.append(ReLU())
-    # self.layers.append(LinearLayer(1024, 1024))
-    # self.layers.append(ReLU())
-    # self.layers.append(LinearLayer(1024, 1024))
-    # self.layers.append(Sigmoid())
-    # self.layers.append(LinearLayer(128, 128))
-    # self.layers.append(Sigmoid())
-    # self.layers.append(LinearLayer(128, 128))
-    # self.layers.append(Sigmoid())
-    # self.layers.append(LinearLayer(128, 128))
-    # self.layers.append(Sigmoid())
-    # self.layers.append(LinearLayer(128, 128))
-    # self.layers.append(Sigmoid())
-    # self.layers.append(LinearLayer(128, 128))
-    # self.layers.append(Sigmoid())
-    # self.layers.append(LinearLayer(128, 128))
-    # self.layers.append(Sigmoid())
-    # self.layers.append(LinearLayer(128, 128))
-    # self.layers.append(Sigmoid())
-    # self.layers.append(LinearLayer(128, 128))
-    # self.layers.append(Sigmoid())
-    # self.layers.append(LinearLayer(128, 128))
-
-    # self.layers.append(Sigmoid())
-
-
-
-    # self.layers.append(LinearLayer(1024, output_dim))
-
+    
   def forward(self, X):
     for layer in self.layers:
       X = layer.forward(X)
@@ -285,9 +202,9 @@ class FeedForwardNeuralNetwork:
     for layer in reversed(self.layers):
       grad = layer.backward(grad)
 
-  def step(self, step_size=0.001):
+  def step(self):
     for layer in self.layers:
-      layer.step(step_size)
+      layer.step()
 
 
 
@@ -309,7 +226,7 @@ class Sigmoid:
     return grad * self.act * (1-self.act)
 
   # The Sigmoid has no parameters so nothing to do during a gradient descent step
-  def step(self,step_size):
+  def step(self, step_size):
     return
 
 # Rectified Linear Unit Activation Function
