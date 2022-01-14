@@ -10,7 +10,7 @@ from tensorflow.keras.datasets import fashion_mnist
 from tensorflow.keras.models import Model
 
 # Download the dataset
-dataframe = pd.read_csv(' ', header=None)
+dataframe = pd.read_csv('http://storage.googleapis.com/download.tensorflow.org/data/ecg.csv', header=None)
 raw_data = dataframe.values
 dataframe.head()
 
@@ -76,11 +76,12 @@ class AnomalyDetector(Model):
 
 # create autoencoder object
 autoencoder = AnomalyDetector()
+autoencoder.compile(optimizer='adam', loss='mae')
 
 # evaluate it
 history = autoencoder.fit(normal_train_data, normal_train_data, 
-          epochs=20, 
-          batch_size=512,
+          epochs=50, 
+          batch_size=10,
           validation_data=(test_data, test_data),
           shuffle=True)
 
