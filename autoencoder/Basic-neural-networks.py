@@ -1,5 +1,7 @@
 import numpy as np
 
+import os
+
 import matplotlib.pyplot as plt
 import logging
 
@@ -18,7 +20,7 @@ matplotlib.rc('font', **font)
 # (we won't neccessarily be adjusting all of these)
 np.random.seed(0)
 batch_size = 200 # the batch size for stochastic gradient descent
-max_epochs = 10000 # number of total epochs to train the neural network
+max_epochs = 50 # number of total epochs to train the neural network
 
 # new hyperparameters
 # hyperparameter tuple = {(activation_callback, width, step_size)}
@@ -65,7 +67,7 @@ def main():
     j = 0
     acc_running = loss_running = 0
 
-    # training the back size (increment j by batch size)
+    # training the batch size (increment j by batch size)
     while j < len(X_train):
 
       # Select the members of this random batch
@@ -226,7 +228,7 @@ class Sigmoid:
     return grad * self.act * (1-self.act)
 
   # The Sigmoid has no parameters so nothing to do during a gradient descent step
-  def step(self, step_size):
+  def step(self):
     return
 
 # Rectified Linear Unit Activation Function
@@ -242,7 +244,7 @@ class ReLU:
     return grad * self.mask
 
   # No parameters so nothing to do during a gradient descent step
-  def step(self,step_size):
+  def step(self):
     return
 
 # create an dictionary with it's associated callback
@@ -307,9 +309,11 @@ def evaluateValidation(model, X_val, Y_val, batch_size):
 # Utility Functions for Loading and Displaying Data #
 #####################################################
 def loadData(normalize = True):
-  train = np.loadtxt("mnist_small_train.csv", delimiter=",", dtype=np.float64)
-  val = np.loadtxt("mnist_small_val.csv", delimiter=",", dtype=np.float64)
-  test = np.loadtxt("mnist_small_test.csv", delimiter=",", dtype=np.float64)
+  cwd = os.getcwd()
+  print(cwd + "\\autoencoder\\mnist_small_train.csv")
+  train = np.loadtxt(cwd + "\\autoencoder\\mnist_small_train.csv", delimiter=",", dtype=np.float64)
+  val = np.loadtxt(cwd + "\\autoencoder\\mnist_small_val.csv", delimiter=",", dtype=np.float64)
+  test = np.loadtxt(cwd + "\\autoencoder\\mnist_small_test.csv", delimiter=",", dtype=np.float64)
 
   # Normalize Our Data
   if normalize:
