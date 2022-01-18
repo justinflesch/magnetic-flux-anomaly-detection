@@ -1,3 +1,13 @@
+# Machine Learning
+
+
+
 # Neural Networks
 
 Basic-neural-networks file contains simple ReLU and Sigmoid activation functions and simple numpy module to demonstrate a simple neural network.
+
+- Autoencoders are encoding data to lower dimensions, then decoding data to reconstruct the data. The objective is the minimize reconstruction error.
+- transform data to 0-1 range for better vizualization.
+- Autoencoders are good for unlabelled data and using a small amount of labelled data to tune threshold
+- This project perhaps would require high recall (low false negative rates) so we can catch all potential anomalies. We would set the threshold lower at the cost of precision known as the ROC curve.
+- Use ensembling to reduce bias, more realizable, reduce variance. Bagging can be useful (sampling with replacement from the original training set). It is good for limited data to reduce variance and overfitting.
