@@ -1,5 +1,7 @@
 import numpy as np
 
+import os
+
 import matplotlib.pyplot as plt
 import logging
 
@@ -17,8 +19,8 @@ matplotlib.rc('font', **font)
 # GLOBAL PARAMETERS FOR STOCHASTIC GRADIENT DESCENT
 # (we won't neccessarily be adjusting all of these)
 np.random.seed(0)
-batch_size = 200 # the batch size for stochastic gradient descent
-max_epochs = 10000 # number of total epochs to train the neural network
+batch_size = 5 # the batch size for stochastic gradient descent
+max_epochs = 50 # number of total epochs to train the neural network
 
 # new hyperparameters
 # hyperparameter tuple = {(activation_callback, width, step_size)}
@@ -39,12 +41,12 @@ def main():
   # Build a network with input feature dimensions, output feature dimension,
   # hidden dimension, and number of layers as specified below
   print("INPUT DIM:", X_train.shape[1])
-  hp_tuple = [(LinearLayer, X_train.shape[1], 0.01), (ReLU, 1024, 0.01), (LinearLayer, 10, 0.01)]
+  hp_tuple = [(ReLU, 128, 0.01), (ReLU, 128, 0.01), (Sigmoid, 128, 0.01)]
 
   for i in range(len(hp_tuple)):
     print(hp_tuple[i][0].__name__)
 #   net = FeedForwardNeuralNetwork(X_train.shape[1],10,width_of_layers,number_of_layers, activation=activation)
-  net = FeedForwardNeuralNetwork(hp_tuple)
+  net = FeedForwardNeuralNetwork(X_train.shape[1], 10, hp_tuple)
   # Some lists for book-keeping for plotting later
   losses = []
   val_losses = []
@@ -65,7 +67,7 @@ def main():
     j = 0
     acc_running = loss_running = 0
 
-    # training the back size (increment j by batch size)
+    # training the batch size (increment j by batch size)
     while j < len(X_train):
 
       # Select the members of this random batch
@@ -179,14 +181,22 @@ class LinearLayer:
 
 class FeedForwardNeuralNetwork:
 
-  def __init__(self, layer_table):
+  def __init__(self, input_dim, output_dim, layer_table):
 
-    # add the first layer
-    self.layers = [LinearLayer(layer_table[0][1], layer_table[2][1], layer_table[0][2])]
+    self.layers = [LinearLayer(input_dim, layer_table[0][1], layer_table[0][2])]
+    # print("First layer i/o:",layer_table[0][1], layer_table[2][1])
+    size = len(layer_table)
     # odd values of "i" must be linearLayers
-    for i in range(1, len(layer_table)):
-    # append the hidden layer activation function
-      self.layers.append(LinearLayer(layer_table[i][1], layer_table[i-2][1], layer_table[i][2])) if i % 2 == 0 else self.layers.append(layer_table[i][0]())
+    for i in range(0, size-1):
+      # each activation function needs a subsequent LinearLayer object
+      self.layers.append(layer_table[i][0]())
+      self.layers.append(LinearLayer(layer_table[i][1], layer_table[i+1][1], layer_table[i][2]))
+
+      # The last LinearLayer object needs to be the output dim
+    self.layers.append(layer_table[size-1][0]())
+    self.layers.append(LinearLayer(layer_table[size-1][1], output_dim, layer_table[size-1][2]))
+
+      
     
     #append the last layer
     # check if it works
@@ -226,7 +236,7 @@ class Sigmoid:
     return grad * self.act * (1-self.act)
 
   # The Sigmoid has no parameters so nothing to do during a gradient descent step
-  def step(self, step_size):
+  def step(self):
     return
 
 # Rectified Linear Unit Activation Function
@@ -242,7 +252,7 @@ class ReLU:
     return grad * self.mask
 
   # No parameters so nothing to do during a gradient descent step
-  def step(self,step_size):
+  def step(self):
     return
 
 # create an dictionary with it's associated callback
@@ -307,9 +317,11 @@ def evaluateValidation(model, X_val, Y_val, batch_size):
 # Utility Functions for Loading and Displaying Data #
 #####################################################
 def loadData(normalize = True):
-  train = np.loadtxt("mnist_small_train.csv", delimiter=",", dtype=np.float64)
-  val = np.loadtxt("mnist_small_val.csv", delimiter=",", dtype=np.float64)
-  test = np.loadtxt("mnist_small_test.csv", delimiter=",", dtype=np.float64)
+  cwd = os.getcwd()
+  print(cwd + "\\autoencoder\\mnist_small_train.csv")
+  train = np.loadtxt(cwd + "\\autoencoder\\mnist_small_train.csv", delimiter=",", dtype=np.float64)
+  val = np.loadtxt(cwd + "\\autoencoder\\mnist_small_val.csv", delimiter=",", dtype=np.float64)
+  test = np.loadtxt(cwd + "\\autoencoder\\mnist_small_test.csv", delimiter=",", dtype=np.float64)
 
   # Normalize Our Data
   if normalize:

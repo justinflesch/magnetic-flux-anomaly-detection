@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -8,6 +10,22 @@ from sklearn.model_selection import train_test_split
 from tensorflow.keras import layers, losses
 from tensorflow.keras.datasets import fashion_mnist
 from tensorflow.keras.models import Model
+
+#GLOBAL HYPERPARAMETERS
+val_test_size = 0.2 # 0.2 default
+val_random_state = 21 # 21 default
+g_optimizer = "adam" # adam
+g_loss = "mae" # mae
+max_epochs = 50 # 50
+batch_size = 200 # 10
+
+# if tf.test.gpu_device_name():
+#   print("GPU is found!")
+# else:
+#   print("No GPU found")
+#tf.debugging.set_log_device_placement(True)
+
+print("Num GPUs available on your PC:", len(tf.config.list_physical_devices('GPU')))
 
 # Download the dataset
 dataframe = pd.read_csv('http://storage.googleapis.com/download.tensorflow.org/data/ecg.csv', header=None)
@@ -20,7 +38,7 @@ data = raw_data[:, 0:-1]
 
 # cross validation (split data)
 train_data, test_data, train_labels, test_labels = train_test_split(
-    data, labels, test_size=0.2, random_state=21
+    data, labels, test_size=val_test_size, random_state=val_random_state
 )
 # Normalize the data to [0,1].
 min_val = tf.reduce_min(train_data)
@@ -60,6 +78,10 @@ class AnomalyDetector(Model):
   def __init__(self):
     super(AnomalyDetector, self).__init__()
     self.encoder = tf.keras.Sequential([
+      layers.Dense(512, activation="relu"),
+      layers.Dense(256, activation="relu"),
+      layers.Dense(128, activation="relu"),
+      layers.Dense(64, activation="relu"),
       layers.Dense(32, activation="relu"),
       layers.Dense(16, activation="relu"),
       layers.Dense(8, activation="relu")])
@@ -67,6 +89,8 @@ class AnomalyDetector(Model):
     self.decoder = tf.keras.Sequential([
       layers.Dense(16, activation="relu"),
       layers.Dense(32, activation="relu"),
+      layers.Dense(64, activation="relu"),
+      layers.Dense(128, activation="relu"),
       layers.Dense(140, activation="sigmoid")])
 
   def call(self, x):
@@ -76,12 +100,12 @@ class AnomalyDetector(Model):
 
 # create autoencoder object
 autoencoder = AnomalyDetector()
-autoencoder.compile(optimizer='adam', loss='mae')
+autoencoder.compile(optimizer=g_optimizer, loss=g_loss)
 
 # evaluate it
 history = autoencoder.fit(normal_train_data, normal_train_data, 
-          epochs=50, 
-          batch_size=10,
+          epochs=max_epochs, 
+          batch_size=batch_size,
           validation_data=(test_data, test_data),
           shuffle=True)
 
