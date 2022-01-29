@@ -1,10 +1,5 @@
 # Required libraries.
 from nptdms import TdmsFile
-import numpy as np
-import pandas as pd
-
-# Plotting.
-import matplotlib.pyplot as plt
 
 def virtualize(filepath):
     tdms_file = TdmsFile.read(filepath) # Read in tdms file.
