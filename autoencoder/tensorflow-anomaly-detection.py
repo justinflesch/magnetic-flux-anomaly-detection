@@ -1,5 +1,7 @@
 import os
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -17,7 +19,7 @@ val_random_state = 21 # 21 default
 g_optimizer = "adam" # adam
 g_loss = "mae" # mae
 max_epochs = 50 # 50
-batch_size = 200 # 10
+batch_size = 10 # 10
 
 # if tf.test.gpu_device_name():
 #   print("GPU is found!")
