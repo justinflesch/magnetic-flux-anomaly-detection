@@ -21,20 +21,20 @@ font = {'weight' : 'normal',
 matplotlib.rc('font', **font)
 
 def loadData_Sensors(csv_path, dim) -> np.array:
-  '''
+  """
   Loads the data from a csv file path. Outputs 5 2d sensor arrays: standard, rtz magnitude by row, rtz magnitude by columns,
   List of matrices by each row, list of matrics by each col.
   
     Parameters:
-      csv_path (String): String to file path in cwd
-      dim (Tuple): Dimensions of the data Tuple, starting with the first numerical string and ending with last
+      :csv_path (String): String to file path in cwd
+      :dim (Tuple): Dimensions of the data Tuple, starting with the first numerical string and ending with last
 
     Returns:
       sensors_array (np.array): Five numpy arrays
 
     Example:
       loadData_Sensors("\\VAR3 Full Melt 12-15-2020 1 Hz.csv", ((1,16),(1,16))
-  '''
+  """
   cwd = os.getcwd()
   print(cwd + csv_path)
 
@@ -143,7 +143,7 @@ def plot_corrcoef(data_array, title, sensorRange=False):
   cols = np.size(data_array, axis=1)
 
   plt.figure(figsize=(12,12))
-  plt.imshow(data_array, vmin=0,vmax=1)
+  plt.imshow(data_array, vmin=-1.0,vmax=1.0)
   plt.grid(True, alpha=0.15)
   plt.colorbar()
   plt.yticks(np.arange(0,cols))
@@ -228,6 +228,8 @@ def load_and_compare_labels(csv_path1, csv_path2, labels):
   data = np.genfromtxt(cwd + csv_path2, dtype=None, delimiter=',', names=True)
   print(data.dtype)
 
+  data_list = [data[label] for label in labels]
+
   ax1.plot(range(len(data_list[0])), data_list[0], c=color, alpha=1)
   ax1.set_xlabel("Time")
   ax1.set_ylabel(labels[0])
@@ -279,9 +281,14 @@ def sensors_covariance(sensors1_data, sensors2_data, rowvar):
 
 if __name__ == "__main__":
 
-  # load_and_compare_labels("\\Combined---EQS-VAR3---09m-01d-20y_1s.csv", "\\Combined---EQS-VAR3---09m-02d-20y_1s.csv", ["MeasurementsPower"])
+  # test_data = np.zeros((3,3))
+  # print(test_data)
+  # print(test_data[:2,:])
 
-  data1, row_data, col_data, row_list, col_list = loadData_Sensors("\\VAR3 Full Melt 12-15-2020 1 Hz.csv", ((1,16), (1,16)))
+  load_and_compare_labels("\\Combined---EQS-VAR3---09m-01d-20y_1s.csv", "\\Combined---EQS-VAR3---09m-02d-20y_1s.csv", ["MeasurementsCurrent"])
+
+  data1, row_data1, col_data1, row_list1, col_list1 = loadData_Sensors("\\Combined---EQS-VAR3---09m-01d-20y_1s.csv", ((1,16), (1,16)))
+  data2, row_data2, col_data2, row_list2, col_list2 = loadData_Sensors("\\Combined---EQS-VAR3---09m-02d-20y_1s.csv", ((1,16), (1,16)))
   # plot_corrcoef(correlationCoeffData(data1), "Sensor Array (sorted by P-plane)")
   # plot_corrcoef(correlationCoeffData(row_data), "sensor Magnitude Array (sorted by P-Plane)")
   # plot_corrcoef(correlationCoeffData(col_data), "sensor Magnitude Array (sorted by C-Plane)")
@@ -295,8 +302,9 @@ if __name__ == "__main__":
   # plot_corrcoef_subplots(subplot_col_corr_list, "C-Plane Sensors", 4, 4, None)
 
   # compare with itself for testing
-  subplot_row_corr_list = [sensors_covariance(array,array, False) for array in row_list]
-  subplot_col_corr_list = [sensors_covariance(array,array, False) for array in col_list]
+
+  subplot_row_corr_list = [sensors_covariance(row_list1[i][10000:25000,:], row_list2[i][10000:25000,:], False) for i in range(0,16)]
+  subplot_col_corr_list = [sensors_covariance(col_list1[i][10000:25000,:],col_list2[i][10000:25000,:], False) for i in range(0,16)]
   plot_corrcoef_subplots(subplot_row_corr_list, "P-Plane Sensors", 4, 4, None)
   plot_corrcoef_subplots(subplot_col_corr_list, "C-Plane Sensors", 4, 4, None)
 
