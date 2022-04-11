@@ -8,14 +8,12 @@ from sklearn.cluster import FeatureAgglomeration
 
 from rulsif import *
 
-import csv
-
 # Hyperparameters
 SampleWidth = 100
 RetroWidth = 10
-Sigma = 1 # 1 works decently
-Alpha = 0.5 # 0.5 works decently
-Lambda = 0.01 # 0.01 works decently
+Sigma = 1 # I have no idea what this should be
+Alpha = 0.5 # Also no real clue here
+Lambda = 0.01
 
 def doublePlot(data1, data2, color = None, marker = 'o'):
     fig, (ax1, ax2) = plt.subplots(2, sharex=True)
@@ -44,24 +42,23 @@ def quadPlot(data1, data2Tuple):
     backward = np.transpose(data2Tuple[:,2,:])
     
     fig, (ax1, ax2) = plt.subplots(2, sharex=True)
-    ax1.plot(data1, alpha=1, label="Y")
-    ax2.plot(*total, alpha=1, label="Divergence")
-    ax2.plot(*forward, alpha=1, label="Divergence")
-    ax2.plot(*backward, alpha=1, label="Divergence")
+    ax1.plot(data1, alpha=0.25, label="Y")
+    ax2.plot(*total, alpha=0.25, label="Divergence")
+    ax2.plot(*forward, alpha=0.25, label="Divergence")
+    ax2.plot(*backward, alpha=0.25, label="Divergence")
     
     plt.show()
 
-with TdmsFile.open("fullmelt - 0.tdms") as tdms_file:
+with TdmsFile.open("fullmelt.tdms") as tdms_file:
     all_groups = tdms_file.groups()
     measurements = tdms_file['Measurements']
     
-    data = measurements.channels()[100:700:4]
+    #data = measurements.channels()[600:700]
+    data = measurements.channels()[500:700]
     
     data = np.nan_to_num(data)
     
     print("Data loaded")
-    
-    # nPlot(measurements.channels()[100:700:30])
     
     agglo = FeatureAgglomeration(n_clusters=6)
     agglo.fit(data.T)
@@ -71,18 +68,10 @@ with TdmsFile.open("fullmelt - 0.tdms") as tdms_file:
     print("Transformation complete")
     print(data.shape, reducedData.shape)
     
-    # nPlot(reducedData)
+    doublePlot(data[0], reducedData[0])
+    
+    nPlot(reducedData)
     
     results = TimeSeriesDissimilarity(reducedData.T, SampleWidth, RetroWidth, Sigma, Alpha, Lambda)
-    print(results.shape)
-
-    binaryResults = results[:,0,1] > 0.95
-
-    with open('anomalydetection.csv', 'w', newline='') as f:
-        writer = csv.writer(f)
-    
-        writer.writerow(results[:,0,0])
-        writer.writerow(results[:,0,1])
-
-    doublePlot(measurements.channels()[0], binaryResults)
+    quadPlot(measurements.channels()[0], results)
     
