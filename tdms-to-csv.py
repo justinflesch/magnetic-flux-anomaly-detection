@@ -3,6 +3,7 @@ from nptdms import TdmsFile
 import numpy as np
 import pandas as pd
 import csv
+import os
 
 # Plotting.
 import matplotlib.pyplot as plt
@@ -18,5 +19,17 @@ def tdms_to_csv(filepath):
 
     return csv_filepath
 
+# convert the files in directory and subdirectories tdms
+def tdms_to_csv_dir(dir_path):
+    for subdir, dirs, files in os.walk(rootdir):
+        for dir in dirs:
+            # recursive call
+            tdms_to_csv_dir(os.path.join(subdir, dir))
+        for file in files:
+            if (file.endswith('.tdms')):
+                tdms_to_csv(os.path.join(subdir, file))
+
+
 if __name__ == "__main__":
-    tdms_to_csv(r"C:\Users\jflesch\Capstone\magnetic-flux-anomaly-detection\Test Data\VAR3---12m-15d-20y-14h-27m_SO_SGeo.tdms")
+    rootdir = 'C:/Users/benja\Desktop/School Stuff/Project Folder/magnetic-flux-anomaly-detection/Capstone Data/Type A'
+    tdms_to_csv_dir(rootdir)
