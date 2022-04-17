@@ -22,14 +22,17 @@ def tdms_to_csv(filepath):
 # convert the files in directory and subdirectories tdms
 def tdms_to_csv_dir(dir_path):
     for subdir, dirs, files in os.walk(rootdir):
-        for dir in dirs:
-            # recursive call
-            tdms_to_csv_dir(os.path.join(subdir, dir))
+        print(subdir, dirs, files)
+        # for dir in dirs:
+        #     # recursive call
+        #     print("Subdirectory prefix: ", subdir)
+        #     print("Directories to search: ", dirs)
+        #     # tdms_to_csv_dir(os.path.join(subdir, dir))
         for file in files:
-            if (file.endswith('.tdms')):
+            if (file.endswith('.tdms') and file.replace(".tdms", ".csv") not in files):
                 tdms_to_csv(os.path.join(subdir, file))
 
 
 if __name__ == "__main__":
-    rootdir = 'C:/Users/benja\Desktop/School Stuff/Project Folder/magnetic-flux-anomaly-detection/Capstone Data/Type A'
+    rootdir = 'C:/Users/benja\Desktop/School Stuff/Project Folder/magnetic-flux-anomaly-detection/Capstone Data/'
     tdms_to_csv_dir(rootdir)
