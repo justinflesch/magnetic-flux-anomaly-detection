@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import csv
 import os
+import sys
 
 # Plotting.
 import matplotlib.pyplot as plt
@@ -21,7 +22,7 @@ def tdms_to_csv(filepath):
 
 # convert the files in directory and subdirectories tdms
 def tdms_to_csv_dir(dir_path):
-    for subdir, dirs, files in os.walk(rootdir):
+    for subdir, dirs, files in os.walk(dir_path):
         print(subdir, dirs, files)
         # for dir in dirs:
         #     # recursive call
@@ -34,5 +35,5 @@ def tdms_to_csv_dir(dir_path):
 
 
 if __name__ == "__main__":
-    rootdir = 'C:/Users/benja\Desktop/School Stuff/Project Folder/magnetic-flux-anomaly-detection/Capstone Data/'
-    tdms_to_csv_dir(rootdir)
+    if len(sys.argv) == 2: # if we only have one argument passed
+        tdms_to_csv_dir(sys.argv[1])
