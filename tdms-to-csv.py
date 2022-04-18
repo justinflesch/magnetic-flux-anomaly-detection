@@ -18,10 +18,13 @@ def tdms_to_csv(filepath):
 
     df.to_csv(csv_filepath) # Convert df to csv file, save to passed string.
 
+    with open(csv_filepath, 'r') as original: data = original.read()
+    with open(csv_filepath, 'w') as modified: modified.write("/\'Time\'" + data)
+
     return csv_filepath
 
 # convert the files in directory and subdirectories tdms
-def tdms_to_csv_dir(dir_path):
+def tdms_to_csv_dir(dir_path, replace=False):
     for subdir, dirs, files in os.walk(dir_path):
         print(subdir, dirs, files)
         # for dir in dirs:
@@ -30,10 +33,15 @@ def tdms_to_csv_dir(dir_path):
         #     print("Directories to search: ", dirs)
         #     # tdms_to_csv_dir(os.path.join(subdir, dir))
         for file in files:
-            if (file.endswith('.tdms') and file.replace(".tdms", ".csv") not in files):
+            if (file.endswith('.tdms') and ((file.replace(".tdms", ".csv") not in files) or replace == True)):
                 tdms_to_csv(os.path.join(subdir, file))
 
 
 if __name__ == "__main__":
     if len(sys.argv) == 2: # if we only have one argument passed
-        tdms_to_csv_dir(sys.argv[1])
+        tdms_to_csv_dir(sys.argv[1], True)
+    elif len(sys.argv) == 3: # take in an a boolean argument
+        if sys.argv[2] == "True" or sys.argv[2] == "true":
+            tdms_to_csv_dir(sys.argv[1], True)
+        else:
+            tdms_to_csv_dir(sys.argv[1], False)
