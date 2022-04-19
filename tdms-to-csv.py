@@ -39,9 +39,15 @@ def tdms_to_csv_dir(dir_path, replace=False):
 
 if __name__ == "__main__":
     if len(sys.argv) == 2: # if we only have one argument passed
+        print("Starting file coversion: tdms --> csv @ directory ", sys.argv[1])
         tdms_to_csv_dir(sys.argv[1], True)
+        print("Conversion completed :)")
     elif len(sys.argv) == 3: # take in an a boolean argument
         if sys.argv[2] == "True" or sys.argv[2] == "true":
+            print("Starting file coversion: tdms --> csv @ directory ", sys.argv[1], "with replacement")
             tdms_to_csv_dir(sys.argv[1], True)
+            print("Conversion completed :)")
         else:
+            print("Starting file coversion: tdms --> csv @ directory ", sys.argv[1], "without replacement")
             tdms_to_csv_dir(sys.argv[1], False)
+            print("Conversion completed :)")
