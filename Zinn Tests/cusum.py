@@ -99,41 +99,26 @@ def autoRegressMod(data, windowSize = 3):
 
     return moddedData
 
-def linearMod(data, windowWidth = 500):
-    channelCount = data.shape[0]
-    windowCount = (data.shape[1]) // windowWidth
-    moddedData = np.zeros(data.shape)
-    
-    for i in range(0, windowCount+1):
-        startPoint = windowWidth * i
-        endPoint = min(windowWidth * (i+1), data.shape[1])
-
-        dataset = data[:, startPoint:endPoint]
-        
-        X = np.arange(0, dataset.shape[1])
-        fit = np.polyfit(X, dataset.T, 1).T
-        m = fit[:,0][:, None]
-        b = fit[:,1][:, None]
-        modMatrix = (X[:, None] @ m.T).T + b
-        
-        moddedData[:, startPoint:endPoint] = dataset - modMatrix
-    
-    return moddedData
-
-# Running average/std
+# Cusum anomaly detection with running mean / standard deviation
+# For each channel, keeps a highsum and a lowsum.
+# The highsum is defined recursively as highsum[i] = max(0, highsum[i-1] + data[i] - mean - kMult*std)
+# The lowsum is defined recursively as lowsum[i] = min(0, lowsum[i-1] + data[i] - mean + kMult*std)
+# If highsum[i] > hMult*std or lowsum[i] < -(hMult*std), then the channel indicates time i to be anomalous, and adds one to qsum
+# Returns qsum, where qsum[i] = # of channels that found time i to be anomalous
 def cusumRunning(data, hMult, kMult = 1):
     qsum = np.zeros(data.shape[1])
     
     # Going through each channel
     for channel in range(0, data.shape[0]):
-        # Arrays to be populated with cusum
+        # Arrays to be populated with highsum / lowsum
         highsum = np.zeros(data.shape[1])
         lowsum = np.zeros(data.shape[1])
 
-        hPos = np.zeros(data.shape[1])
-        hNeg = np.zeros(data.shape[1])
+        # These two arrays are just used for debugging / plotting
+        # hPos = np.zeros(data.shape[1])
+        # hNeg = np.zeros(data.shape[1])
 
-        # Running mean and std deviation of channel
+        # Initializing running mean and std deviation of channel
         total = data[channel][0]
         squaresTotal = (data[channel][0])**2
         mean = data[channel][0]
@@ -158,9 +143,11 @@ def cusumRunning(data, hMult, kMult = 1):
             # Control limit, h
             h = hMult * std
 
-            hPos[i] = h
-            hNeg[i] = (-1) * h
+            # Debugging stuff
+            # hPos[i] = h
+            # hNeg[i] = (-1) * h
 
+            # Populate highsum[i] and lowsum[i]
             highsum[i] = max(0, highsum[i-1] + x - mean - k)
             lowsum[i] = min(0, lowsum[i-1] + x - mean + k)
 
@@ -173,16 +160,20 @@ def cusumRunning(data, hMult, kMult = 1):
                 qsum[i] = qsum[i] + 1
                 # lowsum[i] = 0
 
+        # More debugging stuff
         # triplePlotCusum(data[channel], highsum, lowsum, hPos, hNeg)
 
     return qsum
 
+# Used for constant cusum
+# Runs cusum for a singular channel with constant mean / standard deviation. Read cusumRunning() or cusum() for info about cusum
+# Populates qsum parameter
 def cusumChannel(dataset, qsum, hMult, kMult):
-    # Arrays to be populated with cusum
+    # Arrays to be populated with highsum / lowsum
     highsum = np.zeros(dataset.shape[0])
     lowsum = np.zeros(dataset.shape[0])
 
-    # Mean and std deviation of channel
+    # Initializing mean and std deviation of channel
     mean = np.mean(dataset)
     std = np.std(dataset)
 
@@ -192,7 +183,7 @@ def cusumChannel(dataset, qsum, hMult, kMult):
     # Control limit, h
     h = hMult * std
 
-    # Populate cusum arrays
+    # Populate highsum / lowsum arrays
     for i in range(1, dataset.shape[0]):
         highsum[i] = max(0, highsum[i-1] + dataset[i] - mean - k)
         lowsum[i] = min(0, lowsum[i-1] + dataset[i] - mean + k)
@@ -207,10 +198,13 @@ def cusumChannel(dataset, qsum, hMult, kMult):
             qsum[i] = qsum[i] + 1
             # lowsum[i] = 0
 
-    hPos = np.full(dataset.shape[0], h)
-    hNeg = np.full(dataset.shape[0], ((-1) * h))
-    # triplePlotCusum(dataset, highsum, lowsum, hPos, hNeg)
-
+# Cusum anomaly detection with NO RUNNING MEAN / STD
+# Use cusumRunning for running mean / std
+# For each channel, keeps a highsum and a lowsum.
+# The highsum is defined recursively as highsum[i] = max(0, highsum[i-1] + data[i] - mean - kMult*std)
+# The lowsum is defined recursively as lowsum[i] = min(0, lowsum[i-1] + data[i] - mean + kMult*std)
+# If highsum[i] > hMult*std or lowsum[i] < -(hMult*std), then the channel indicates time i to be anomalous, and adds one to qsum
+# Returns qsum, where qsum[i] = # of channels that found time i to be anomalous
 def cusum(data, hMult, kMult = 1):
     qsum = np.zeros(data.shape[1])
     

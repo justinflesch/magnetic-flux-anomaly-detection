@@ -51,7 +51,7 @@ def triplePlot(data1, data2, data3, color = None, marker = 'o'):
 
     plt.show()
 
-def autoRegressMod(data, numprev):
+def previousPolyfit(data, numprev):
     moddedData = np.zeros((data.shape[0], data.shape[1]-numprev))
 
     for channel in range(0, data.shape[0]):
@@ -69,23 +69,29 @@ def autoRegressMod(data, numprev):
 
     return moddedData
 
+# Does a linear regression on each window of size windowWidth to get expectedVals
+# Then returns data - expectedVals to leave residuals
 def linearMod(data, windowWidth = 500):
-    channelCount = data.shape[0]
     windowCount = (data.shape[1]) // windowWidth
     moddedData = np.zeros(data.shape)
     
+    # For each window
     for i in range(0, windowCount+1):
+        # Get start and end index of the current window
         startPoint = windowWidth * i
         endPoint = min(windowWidth * (i+1), data.shape[1])
 
         dataset = data[:, startPoint:endPoint]
         
+        # Uses really weird syntax + linear algebra stuff to make an array modMatrix
+        # filled with the expected values found via polyfit
         X = np.arange(0, dataset.shape[1])
         fit = np.polyfit(X, dataset.T, 1).T
         m = fit[:,0][:, None]
         b = fit[:,1][:, None]
         modMatrix = (X[:, None] @ m.T).T + b
         
+        # Takes difference between dataset and modMatrix to get residuals
         moddedData[:, startPoint:endPoint] = dataset - modMatrix
     
     return moddedData
@@ -94,35 +100,16 @@ with TdmsFile.open("fullmelt - 0.tdms") as tdms_file:
     all_groups = tdms_file.groups()
     measurements = tdms_file['Measurements']
     
-    #data = measurements.channels()[500:510]
     data = measurements.channels()[500:510]
     
     data = np.nan_to_num(data)
     
-    autoRegress = autoRegressMod(data, 5)
-    linear = linearMod(data)
-
-    ##########################################################
-
-    # # Sliding window
-    # slidingWindow = np.lib.stride_tricks.sliding_window_view(data, 50, axis=1)
-
-    # # Mean/stddev/variance of each window
-    # windowMean = np.mean(slidingWindow, axis=2)
-    # # windowStd = np.std(slidingWindow, axis=2)
-    # # windowVar = np.var(slidingWindow, axis=2)
-
-    # autoRegress = autoRegress[:,0:windowMean.shape[1]]
-    # result = autoRegress - windowMean
-
-    # normed = (autoRegress - autoRegress.mean())/(autoRegress.std())
-
-    # doublePlot(autoRegress[0], result[0])
-
-    ##########################################################
+    # Get residuals
+    previousPolyfitResult = previousPolyfit(data, 5)
     
-    transposeData = autoRegress.T
+    transposeData = previousPolyfitResult.T
     
+    # Run elliptic envelope on residuals
     elp = EllipticEnvelope(contamination = 0.03)
     elp.fit(transposeData)
     ret = elp.score_samples(transposeData)

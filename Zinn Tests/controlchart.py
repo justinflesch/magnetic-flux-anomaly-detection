@@ -64,12 +64,18 @@ def quadPlot(data1, data2, data3, data4, color = None, marker = 'o'):
 
     plt.show()
 
+# Control chart anomaly detection
+# For each channel, gets an upper control limit (UCL) and lower control limit (LCL) based on running mean and stdMult * standard deviation
+# If the reading for that time value are above or below the UCL or LCL, that channel is marked anomalous for the given time value
+# If a percentage of the channels are anomalous for a time value (based on sndAlarm), then the time value is marked anomalous
+# Note: This currently returns ctrlAvg, where ctrlAvg[i] = fraction of channels that found time i to be anomalous
+# However, changing the return to anomalies will return an array of 1's and 0's where anomalies[i] = 1 indicates time i is anomalous
 def ctrlChart(data, stdMult = 2, sndAlarm = 0.25):
     ctrl = np.zeros(data.shape[1])
 
     # Going through each channel for 1st level alarm
     for channel in range(0, data.shape[0]):
-        # Initializing running mean / standard deviation
+        # Running mean and std deviation of channel
         total = data[channel][0]
         squaresTotal = (data[channel][0])**2
         mean = data[channel][0]
@@ -111,7 +117,7 @@ def ctrlChart(data, stdMult = 2, sndAlarm = 0.25):
             anomalies[i] = 1
 
     # Currently returns ctrlAvg for more detailed results.
-    # Can change this return to be anomalies to have a more binary yes/no answer. TBD
+    # Can change this return to be anomalies to have a more binary yes/no answer.
     return ctrlAvg
 
 with TdmsFile.open("fullmelt - 0.tdms") as tdms_file:

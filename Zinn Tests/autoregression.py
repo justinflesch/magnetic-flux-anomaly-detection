@@ -84,19 +84,31 @@ def fivePlot(data1, data2, data3, data4, data5, color = None, marker = 'o'):
 
     plt.show()
 
+# Returns a 2d array (approximately) the size of the data passed in
+# Does an autoregression on the data using the last windowSize values to get expectedVals, then returns the difference data - expectedVals
+# Therefore, just leaves the residuals
 def autoRegressMod(data, windowSize = 3):
     moddedData = np.zeros((data.shape[0], data.shape[1]-windowSize))
 
     # For each sensor
     for channel in range(0, data.shape[0]):
+        # Creates 2d array with windowSize columns. For example, if the original dataset was 1, 2, 3, 4 ... slidingWindow would be 
+        # [1 2]
+        # |2 3|
+        # |3 4|
+        # [...]
         slidingWindow = np.lib.stride_tricks.sliding_window_view(data[channel][:-1], windowSize)
 
+        # y is a 1d array of the expected values (the values for each time tick)
         y = data[channel][windowSize:]
 
+        # Fits a linear regression using the values from slidingWindow to predict the values in y
         reg = LinearRegression().fit(slidingWindow, y)
 
         expectedVals = reg.predict(slidingWindow)
 
+        # Once the expected values are found via the autoregression, take the difference between
+        # the original values and expectedVals to get the residual. Fill moddedData with the channel's residuals
         moddedData[channel] = y - expectedVals
 
     return moddedData

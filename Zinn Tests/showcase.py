@@ -256,6 +256,7 @@ def cusumRunning(data, hMult, kMult = 1):
 
     return qsum
 
+# Used for constant cusum
 # Runs cusum for a singular channel with constant mean / standard deviation. Read cusumRunning() or cusum() for info about cusum
 # Populates qsum parameter
 def cusumChannel(dataset, qsum, hMult, kMult):

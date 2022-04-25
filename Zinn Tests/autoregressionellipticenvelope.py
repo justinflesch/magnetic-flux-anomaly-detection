@@ -51,40 +51,58 @@ def triplePlot(data1, data2, data3, color = None, marker = 'o'):
 
     plt.show()
 
-def autoRegressMod(data, numprev):
-    moddedData = np.zeros((data.shape[0], data.shape[1]-numprev))
+# Returns a 2d array (approximately) the size of the data passed in
+# Does an autoregression on the data using the last windowSize values to get expectedVals, then returns the difference data - expectedVals
+# Therefore, just leaves the residuals
+def autoRegressMod(data, windowSize = 3):
+    moddedData = np.zeros((data.shape[0], data.shape[1]-windowSize))
 
+    # For each sensor
     for channel in range(0, data.shape[0]):
-        for reading in range(numprev, moddedData.shape[1]):
-            dataset = data[channel][(reading-numprev):reading]
+        # Creates 2d array with windowSize columns. For example, if the original dataset was 1, 2, 3, 4 ... slidingWindow would be 
+        # [1 2]
+        # |2 3|
+        # |3 4|
+        # [...]
+        slidingWindow = np.lib.stride_tricks.sliding_window_view(data[channel][:-1], windowSize)
 
-            fit = np.polyfit(range(0,numprev), dataset, 1)
-            m = fit[0]
-            b = fit[1]
-            
-            expectedVal = (m * numprev) + b
+        # y is a 1d array of the expected values (the values for each time tick)
+        y = data[channel][windowSize:]
 
-            moddedData[channel][reading] = data[channel][reading] - expectedVal
+        # Fits a linear regression using the values from slidingWindow to predict the values in y
+        reg = LinearRegression().fit(slidingWindow, y)
+
+        expectedVals = reg.predict(slidingWindow)
+
+        # Once the expected values are found via the autoregression, take the difference between
+        # the original values and expectedVals to get the residual. Fill moddedData with the channel's residuals
+        moddedData[channel] = y - expectedVals
 
     return moddedData
 
+# Does a linear regression on each window of size windowWidth to get expectedVals
+# Then returns data - expectedVals to leave residuals
 def linearMod(data, windowWidth = 500):
-    channelCount = data.shape[0]
     windowCount = (data.shape[1]) // windowWidth
     moddedData = np.zeros(data.shape)
     
+    # For each window
     for i in range(0, windowCount+1):
+        # Get start and end index of the current window
         startPoint = windowWidth * i
         endPoint = min(windowWidth * (i+1), data.shape[1])
 
         dataset = data[:, startPoint:endPoint]
         
+        # Uses really weird syntax + linear algebra stuff to make an array modMatrix
+        # filled with the expected values found via polyfit
         X = np.arange(0, dataset.shape[1])
         fit = np.polyfit(X, dataset.T, 1).T
         m = fit[:,0][:, None]
         b = fit[:,1][:, None]
         modMatrix = (X[:, None] @ m.T).T + b
         
+        # Takes difference between dataset and modMatrix to get residuals
         moddedData[:, startPoint:endPoint] = dataset - modMatrix
     
     return moddedData
