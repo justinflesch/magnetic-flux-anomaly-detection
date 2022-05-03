@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mplt
 from math import *
+import csv
 
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
@@ -245,3 +246,8 @@ with TdmsFile.open("fullmelt - 0.tdms") as tdms_file:
     triplePlot(measurements.channels()[0], cusumed, runningcusumed)
 
     # triplePlot(measurements.channels()[0][1200:], data[0], cusumed)
+
+    with open('output.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(np.arange(0, runningcusumed.shape[0], 1))
+        writer.writerow(runningcusumed)

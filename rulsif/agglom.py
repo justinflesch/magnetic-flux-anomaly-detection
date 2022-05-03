@@ -103,7 +103,7 @@ with TdmsFile.open("fullmelt - 0.tdms") as tdms_file:
     
     while True:
         try:
-            np.savetxt("output.csv", resultsTotal, delimiter=",")
+            np.savetxt("output.csv", resultsTotal.T, delimiter=",", fmt='%f')
         except PermissionError:
             input("write failed; press enter to retry")
         else:

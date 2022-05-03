@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mplt
 from math import *
+import csv
 
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
@@ -132,3 +133,8 @@ with TdmsFile.open("fullmelt - 0.tdms") as tdms_file:
     ctrlCharted = ctrlChart(data, 3.5, 0.35)
 
     doublePlot(measurements.channels()[0], ctrlCharted)
+
+    with open('output.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(np.arange(0, ctrlCharted.shape[0], 1))
+        writer.writerow(ctrlCharted)
