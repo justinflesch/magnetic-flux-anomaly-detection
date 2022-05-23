@@ -2,3 +2,5 @@
 venv/
 *.tdms
 *.csv
+*.tdms_index
+*.pyc

@@ -143,7 +143,7 @@ def graph_labels(data, labels) -> None:
   Outputs a graph based on a list of labels provided
 
     Parameters:
-      :data (np.ndarray): numpy data object with labl
+      data (np.ndarray): numpy data object with labl
 
 
     Returns:
@@ -235,7 +235,7 @@ def compare_data(data1, data2, path_list=None) -> None:
 
   if path_list:
     for tuple in path_list:
-      plt.plot([tuple[0], tuple[1]], [data2[tuple[0]], data2[tuple[1]]], 'k-', lw=1)
+      plt.plot([tuple[0], tuple[1]], [data1[tuple[0]], data2[tuple[1]]], 'k-', lw=0.5)
   
   fig.tight_layout()  # otherwise the right y-label is slightly clipped
   plt.show()

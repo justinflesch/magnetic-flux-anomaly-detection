@@ -1,0 +1,197 @@
+# import our modules
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
+import tensorflow as tf
+import gzip
+import numpy as np
+
+# label our map
+labels_map = {
+  0: 'T-Shirt',
+  1: 'Trouser',
+  2: 'Pullover',
+  3: 'Dress',
+  4: 'Coat',
+  5: 'Sandal',
+  6: 'Shirt',
+  7: 'Sneaker',
+  8: 'Bag',
+  9: 'Ankle Boot',
+}
+
+# https://www.tensorflow.org/api_docs/python/tf/keras/datasets
+
+# (training_images, training_labels), (test_images, test_labels) = tf.keras.datasets.fashion_mnist.load_data()
+
+def read_images(path: str, image_size: int, num_items: int) -> np.ndarray:
+  with gzip.open(path, 'rb') as file:
+    data = np.frombuffer(file.read(), np.uint8, offset=16)
+    data = data.reshape(num_items, image_size, image_size)
+  return data
+
+def read_labels(path: str, num_items: int) -> np.ndarray:
+  with gzip.open(path, 'rb') as file:
+    data = np.frombuffer(file.read(num_items + 8), np.uint8, offset=8)
+    data = data.astype(np.int64)
+  return data
+
+image_size = 28
+num_train = 60000
+num_test = 10000
+
+training_images = read_images('data/FashionMNIST/raw/train-images-idx3-ubyte.gz', image_size, num_train)
+test_images = read_images('data/FashionMNIST/raw/t10k-images-idx3-ubyte.gz', image_size, num_test)
+training_labels = read_labels('data/FashionMNIST/raw/train-labels-idx1-ubyte.gz', num_train)
+test_labels = read_labels('data/FashionMNIST/raw/t10k-labels-idx1-ubyte.gz', num_test)
+
+# show the data we are working with
+import random
+import matplotlib.pyplot as plt
+
+figure = plt.figure(figsize=(8, 8))
+cols = 3
+rows = 3
+for i in range(1, cols * rows + 1):
+  sample_idx = random.randint(0, len(training_images))
+  image = training_images[sample_idx]
+  label = training_labels[sample_idx]
+  figure.add_subplot(rows, cols, i)
+  plt.title(labels_map[label])
+  plt.axis('off')
+  plt.imshow(image.squeeze(), cmap='gray')
+plt.show()
+
+# show data
+training_labels[0]
+
+# wrap data in keras
+train_dataset = tf.data.Dataset.from_tensor_slices((training_images, training_labels))
+test_dataset = tf.data.Dataset.from_tensor_slices((test_images, test_labels))
+
+# convert to 0 - 1
+train_dataset = train_dataset.map(lambda image, label: (float(image) / 255.0, label))
+test_dataset = test_dataset.map(lambda image, label: (float(image) / 255.0, label))
+
+# show the results
+train_dataset.as_numpy_iterator().next()[0]
+
+# shuffle data
+batch_size = 64
+train_dataset = train_dataset.batch(batch_size).shuffle(500)
+test_dataset = test_dataset.batch(batch_size).shuffle(500)
+
+# access the data with an iterator (cannot access it like numpy)
+len(train_dataset.as_numpy_iterator().next()[0])
+
+# -----------------------
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
+import tensorflow as tf
+
+# create our neural network
+class NeuralNetwork(tf.keras.Model):
+  def __init__(self):
+    super(NeuralNetwork, self).__init__()
+    self.sequence = tf.keras.Sequential([
+      tf.keras.layers.Flatten(input_shape=(28, 28)),
+      tf.keras.layers.Dense(20, activation='relu'),
+      tf.keras.layers.Dense(10)
+    ])
+
+  def call(self, x: tf.Tensor) -> tf.Tensor:
+    y_prime = self.sequence(x)
+    return y_prime
+
+# The Sequential class combines all the other layers. Lastly, we define the call method, which supplies a tensor x as input to the sequence of layers and produces the y_prime vector as a result.
+
+# print description
+model = NeuralNetwork()
+model.build((1, 28, 28))
+model.summary()
+
+# ---------------------------
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
+import numpy as np
+import tensorflow as tf
+from typing import Tuple
+
+!wget -Nq https://raw.githubusercontent.com/MicrosoftDocs/tensorflow-learning-path/main/intro-keras/kintro.py
+from kintro import *
+
+# . Because our dataset includes a single integer label for each example, we use the SparseCategoricalCrossentropy loss function.
+
+# dense layers: z_1^1 = w_1^1*x_1 + ... + w_784^1x_784 + b_1^1
+
+# compile 
+learning_rate = 0.1
+batch_size = 64
+
+(train_dataset, test_dataset) = get_data(batch_size)
+
+model = NeuralNetwork()
+
+loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+optimizer = tf.keras.optimizers.SGD(learning_rate)
+metrics = ['accuracy']
+model.compile(optimizer, loss_fn, metrics)
+
+# Notice that we pass from_logits=True to the loss function. This is because the categorical cross-entropy function requires a probability distribution as input, meaning that the numbers should be between zero and one, and they should add up to one. Our network produces a vector of numbers that have no upper or lower bound (called "logits"), so we need to normalize them to get a probability distribution. This is typically done using the softmax function, and specifying from_logits=True automatically calculates the softmax before computing the loss.
+# Notice also that we pass a learning_rate to the SGD optimizer. The learning rate is a parameter needed in the gradient descent algorithm. We could have left it at the default, which is 0.01, but it's important to know how to specify it because different learning rates can lead to very different prediction accuracies.
+
+epochs = 5
+print('\nFitting:')
+model.fit(train_dataset, epochs=epochs)
+
+# run our tests
+print('\nEvaluating:')
+(test_loss, test_accuracy) = model.evaluate(test_dataset)
+print(f'\nTest accuracy: {test_accuracy * 100:>0.1f}%, test loss: {test_loss:>8f}')
+
+# save the outputs
+ model.save('outputs/model')
+
+ # ------------------------------
+
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
+import numpy as np
+import tensorflow as tf
+import requests
+from PIL import Image
+import matplotlib.pyplot as plt
+
+!wget -Nq https://raw.githubusercontent.com/MicrosoftDocs/tensorflow-learning-path/main/intro-keras/kintro.py
+from kintro import *
+
+# load our previous model
+model = tf.keras.models.load_model('outputs/model')
+
+# predict with model
+url = 'https://raw.githubusercontent.com/MicrosoftDocs/tensorflow-learning-path/main/intro-keras/predict-image.png'
+
+with Image.open(requests.get(url, stream=True).raw) as image:
+  X = np.asarray(image, dtype=np.float32).reshape((-1, 28, 28)) / 255.0
+
+plt.figure()
+plt.axis('off')
+plt.imshow(X.squeeze(), cmap='gray')
+plt.show()
+
+# show the prediction
+predicted_vector = model.predict(X)
+predicted_index = np.argmax(predicted_vector)
+predicted_name = labels_map[predicted_index]
+
+print(f'Predicted class: {predicted_name}')
+
+# get the softmax probabilities
+probs = tf.nn.softmax(predicted_vector.reshape((-1,)))
+for i,p in enumerate(probs):
+    print(f'{labels_map[i]} -> {p:.3f}')
+
+# If you need to compute probabilities often, you can specify activation='softmax' for the final Dense layer of your network. In this case the network would give you probabilities as output, and you need to omit use_logits=True in the SparseCategoricalCrossentropy loss function.

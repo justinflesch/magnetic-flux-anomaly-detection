@@ -27,12 +27,16 @@ font = {'weight' : 'normal',
 matplotlib.rc('font', **font)
 
 
-
 def fast_dtw_label(data1, data2, label):
+
 
   data_label1 = data1[label]
   data_label2 = data2[label]
 
+  distance = dtw.distance_fast(data_label1, data_label2)
+  print("DISTANCE:", distance)
+  distance, paths = dtw.warping_paths_fast(data_label1, data_label2)
+  print("DISTANCE:", distance, "PATHS", paths)
   path = dtw.warping_path_fast(data_label1, data_label2)
   return path
 
@@ -46,6 +50,8 @@ def transform_graphs_from_dtw_path(data1, data2, path_mapping, label):
   return new_data1, new_data2
 
 
+
+
 if __name__ == "__main__":
   print("ARGUMENTS PASSED:")
   for i, x in enumerate(sys.argv):
@@ -57,7 +63,11 @@ if __name__ == "__main__":
   path = fast_dtw_label(data_list[0], data_list[1], "MeasurementsCurrent")
   print("Finished calculating dtw path :)")
 
+  path_vis = path[::200]
+  ad.compare_data(data_list[0]["MeasurementsCurrent"], data_list[1]["MeasurementsCurrent"], path_vis)
+
   new_data1, new_data2 = transform_graphs_from_dtw_path(data_list[0], data_list[1], path, "MeasurementsCurrent")
+  print(type(new_data1), type(new_data2), len(new_data1), len(new_data2))
   ad.compare_data(new_data1, new_data2)
 
 
