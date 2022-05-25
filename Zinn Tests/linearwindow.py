@@ -61,7 +61,7 @@ def linearMod(data, windowWidth = 500):
     return moddedData
 
 # Import data
-with TdmsFile.open("fullmelt.tdms") as tdms_file:
+with TdmsFile.open("melt.tdms") as tdms_file:
     all_groups = tdms_file.groups()
     measurements = tdms_file['Measurements']
     

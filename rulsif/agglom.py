@@ -71,7 +71,7 @@ def getAnomalyScores(length):
     
     return result
 
-with TdmsFile.open("fullmelt - 0.tdms") as tdms_file:
+with TdmsFile.open("melt.tdms") as tdms_file:
     all_groups = tdms_file.groups()
     measurements = tdms_file['Measurements']
     

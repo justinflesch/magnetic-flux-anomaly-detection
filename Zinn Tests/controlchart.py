@@ -121,7 +121,7 @@ def ctrlChart(data, stdMult = 2, sndAlarm = 0.25):
     # Can change this return to be anomalies to have a more binary yes/no answer.
     return ctrlAvg
 
-with TdmsFile.open("fullmelt - 0.tdms") as tdms_file:
+with TdmsFile.open("melt.tdms") as tdms_file:
     all_groups = tdms_file.groups()
     measurements = tdms_file['Measurements']
     
