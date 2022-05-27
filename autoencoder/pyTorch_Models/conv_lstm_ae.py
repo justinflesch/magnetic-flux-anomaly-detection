@@ -3,8 +3,8 @@ import torch
 import torch.nn as nn
 
 # Local Modules
-from sequitur.models.lstm_ae import LSTM_AE
-from sequitur.models.conv_ae import CONV_AE
+from autoencoder.pyTorch_Models.lstm_ae import LSTM_AE
+from autoencoder.pyTorch_Models.conv_ae import CONV_AE
 
 
 ######
