@@ -189,8 +189,8 @@ Packages:
         - nptdms
         - numpy
 
-> Steps to run:
-> First, the data files must be formatted properly.  To format the ML output, use the fix_ML_output.py file for creating a `_fixed.csv` file that will work with the webapp by running `py fix_ML_output.py <your file here>` and a `_fixed.csv` file will be saved to the same folder that the ML output csv is stored in, here’s an example command:
+Steps to run:
+First, the data files must be formatted properly.  To format the ML output, use the fix_ML_output.py file for creating a `_fixed.csv` file that will work with the webapp by running `py fix_ML_output.py <your file here>` and a `_fixed.csv` file will be saved to the same folder that the ML output csv is stored in, here’s an example command:
 
 ```console
 flux$ python fix_ML_output.py /home/justin/Documents/OSU/capstone/linechart-for-magnetic-flux/anomalydetection.csv
