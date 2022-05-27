@@ -30,6 +30,7 @@ https://github.com/justinflesch/magnetic-flux-anomaly-detection
 Note: More documentation is available in our repository under:
 - Zinn Tests/Zinn_ML_Documentation.ipynb
 - Dtw\basic_dtw.ipynb
+- autoencoder/autoencoder.ipynb
 - Covariance\Covariance_Detection.ipynb
 - rulsif/RulsifNotes.pdf
 
