@@ -24,8 +24,6 @@ def visualize(df):
             #print(col)
             result = regex.search(col)
             if (result):
-                print(result.string)
-            if (result): # Columns that are sensor data have a P in the 17th index of the column name.
                 #plt.subplot() # Add a subplot to our plot for this data.
                 #print(df[col]) # Print the data within this dataframe column.
                 plt.plot(df[col]) # Plot this data.
