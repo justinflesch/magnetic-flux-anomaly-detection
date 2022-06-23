@@ -1,5 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+import re
+
+from data_virtualization import virtualize
 
 def visualize(df):
     print("Visualizing data...")
@@ -14,9 +18,14 @@ def visualize(df):
     for c in ['r', 't', 'z']:
         plt.figure() 
 
+        regex = re.compile("\D\d+\D\d+"+c)
+
         for col in df:
             #print(col)
-            if str(col)[17] == "P" and str(col)[-2] == c: # Columns that are sensor data have a P in the 17th index of the column name.
+            result = regex.search(col)
+            if (result):
+                print(result.string)
+            if (result): # Columns that are sensor data have a P in the 17th index of the column name.
                 #plt.subplot() # Add a subplot to our plot for this data.
                 #print(df[col]) # Print the data within this dataframe column.
                 plt.plot(df[col]) # Plot this data.
@@ -38,3 +47,13 @@ def visualize(df):
 
     plt.show() # Show all data in one plot.
     print("Visualization completed.")
+
+if __name__ == "__main__":
+    print(sys.path)
+    print("ARGUMENTS PASSED:")
+    for i, x in enumerate(sys.argv):
+        print("\t[" + str(i) + "] " + x)
+    if len(sys.argv) == 2:
+        
+        df = virtualize(sys.argv[1])
+        visualize(df)
