@@ -48,6 +48,39 @@
             "args": [
             ]
         },
+        {
+            "name": "Dtw",
+            "type": "python",
+            "request": "launch",
+            "program": "dtw\\Dynamic_Time_Warping.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv",
+                "Capstone Data\\Combined---EQS-VAR3---09m-02d-20y_1s.csv"
+            ]
+        },
+        {
+            "name": "rulsif",
+            "type": "python",
+            "request": "launch",
+            "program": "rulsif\\agglom.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv",
+                "Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv"
+            ]
+        },
+        {
+            "name": "covariance",
+            "type": "python",
+            "request": "launch",
+            "program": "Covariance\\Covariance_Detection.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv",
+                "Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv"
+            ]
+        },
 
 
     ]
