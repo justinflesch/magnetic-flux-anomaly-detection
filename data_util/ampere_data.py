@@ -8,6 +8,14 @@ import matplotlib.pyplot as plt
 import functools
 import time
 
+import pandas as pd
+
+from data_normalization import *
+from data_virtualization import *
+from data_visualization import *
+
+import torch
+
 # configurations for the basic logging
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -30,11 +38,9 @@ def timer_decorator(func, time_filter=None):
         return results
     return wrapper
 
-
-
-# This function is expensive and should only be run once in the program!
+# This function is expensive and should only be run once in the program! DO NOT USE
 @timer_decorator
-def load_data_sensors(csv_path) -> np.ndarray:
+def load_data_sensors(csv_path: str) -> np.ndarray:
   """
   Loads the data from a csv file path.
   
@@ -61,6 +67,7 @@ def load_data_sensors(csv_path) -> np.ndarray:
 
 
 # pull the MeasurementsP..C.. portion from the numpy.ndarray
+# The code below needs to be refactored for pd.dataframe and torch/keras linalg
 def PC_data(data, dim=((1,16),(1,16))) -> np.array:
   """
   Outputs 5 2d sensor arrays: standard, rtz magnitude by row, rtz magnitude by columns,
@@ -134,6 +141,8 @@ def PC_data(data, dim=((1,16),(1,16))) -> np.array:
 
   return sensors_array, sensors_rtz_array_row, sensors_rtz_array_col, row_rtz_list, col_rtz_list
   
+# def PC_data_pandas(df: pd.DataFrame) -> pd.DataFrame:
+
 
 # graph the subset labels from the np.ndarray
 @timer_decorator
@@ -244,18 +253,34 @@ def compare_data(data1, data2, path_list=None) -> None:
 
 
 if __name__ == "__main__":
-  print("ARGUMENTS PASSED:")
-  for i, x in enumerate(sys.argv):
-    print("\t[" + str(i) + "] " + x)
-  # passed arguments start at index 1
-  print("Loading csv data...")
-  data_list = [load_data_sensors(sys.argv[x]) for x in range(1, len(sys.argv))]
-  print("Finished laoding csv data :)")
+  # print("ARGUMENTS PASSED:")
+  # for i, x in enumerate(sys.argv):
+  #   print("\t[" + str(i) + "] " + x)
+  # # passed arguments start at index 1
+  # print("Loading csv data...")
+  # # data_list = [load_data_sensors(sys.argv[x]) for x in range(1, len(sys.argv))]
+  # data_list = load_data_sensors("Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv")
+  # print("Finished laoding csv data :)")
+  # data_list2 = load_data_sensors_pandas("Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.tdms")
+  # print("Finished laoding tdms data :)")
 
-  print("Pulling PC data...")
-  PC_list = [[PC_data(data)] for data in data_list]
-  print("Finished pulling and processing PC data :)")
+  # print("Pulling PC data...")
+  # PC_list = [[PC_data(data)] for data in data_list]
+  # print("Finished pulling and processing PC data :)")
 
-  print("Graphing current in first data")
-  graph_labels(data_list[0], ["MeasurementsCurrent"])
-  print("Finished graphing first data\'s current :)")
+  # print("Graphing current in first data")
+  # graph_labels(data_list[0], ["MeasurementsCurrent"])
+  # print("Finished graphing first data\'s current :)")
+
+  test = np.array([
+    [[1,2,3,4], [1,2,3,4], [1,2,3,4]],
+    [[1,2,3,4], [1,2,3,4], [1,2,3,4]]],
+    dtype=np.float
+  )
+  print(np.linalg.norm(test, axis=0))
+
+  test2 = torch.from_numpy(test)
+
+  print(torch.linalg.norm(test2, dim=1, out=test2))
+
+  print(test)
