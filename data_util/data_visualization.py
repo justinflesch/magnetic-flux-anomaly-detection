@@ -3,7 +3,7 @@ import numpy as np
 import sys
 import re
 
-from data_virtualization import virtualize
+from data_util.data_virtualization import virtualize
 
 def visualize(df):
     print("Visualizing data...")

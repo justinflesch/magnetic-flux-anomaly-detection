@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
-from data_virtualization import virtualize
+from data_util.data_virtualization import virtualize
 
 import sys
 
