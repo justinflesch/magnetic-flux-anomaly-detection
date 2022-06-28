@@ -3,7 +3,7 @@ import numpy as np
 import sys
 import re
 
-from data_util.data_virtualization import virtualize
+# from data_virtualization import virtualize
 
 def visualize(df):
     print("Visualizing data...")
@@ -55,6 +55,7 @@ def visualize(df):
     print("Visualization completed.")
 
 if __name__ == "__main__":
+    from data_virtualization import virtualize
     print(sys.path)
     print("ARGUMENTS PASSED:")
     for i, x in enumerate(sys.argv):

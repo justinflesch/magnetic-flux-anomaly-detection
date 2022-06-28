@@ -10,9 +10,9 @@ import time
 
 import pandas as pd
 
-from data_util.data_normalization import *
-from data_util.data_virtualization import *
-from data_util.data_visualization import *
+# from data_util.data_normalization import *
+# from data_util.data_virtualization import *
+# from data_util.data_visualization import *
 
 import torch
 
@@ -142,7 +142,61 @@ def PC_data(data, dim=((1,16),(1,16))) -> np.array:
   return sensors_array, sensors_rtz_array_row, sensors_rtz_array_col, row_rtz_list, col_rtz_list
   
 def PC_data_pandas(df: pd.DataFrame) -> pd.DataFrame:
-  # 
+
+  # print("MISSING VALUES:\n", df.isnull())
+
+  # print("SUM OF MISISNG VALUES:\n", df.isnull().sum())
+
+  # print("ROWS ARE NULL:\n", df[df.isnull().any(axis=1)])
+  # print("COLS ARE NULL:\n", df.columns[df.isnull().any()].tolist())
+
+  # Drop the columns that contain null values
+  df = df.dropna(axis=1, how='any')
+
+
+  # create our labels to add to the pandas frame
+  rtz_list = ["MeasurementsP" + f'{x:02d}' + "C" + f'{y:02d}_rtz' for x in range(1,17) for y in range(1,17) \
+  if "/\'Measurements\'/\'P" + f'{x:02d}' + "C" + f'{y:02d}' + "r\'" in df \
+  and "/\'Measurements\'/\'P" + f'{x:02d}' + "C" + f'{y:02d}' + "t\'" in df \
+  and "/\'Measurements\'/\'P" + f'{x:02d}' + "C" + f'{y:02d}' + "z\'" in df]
+  # print("yes" if "/\'Measurements\'/\'P01C01r\'" in df else "no")
+  # print(rtz_list)
+
+  # create a tensor directly from data
+  n_array = np.array([[df["/\'Measurements\'/\'P" + f'{x:02d}' + "C" + f'{y:02d}' + "r\'"], df["/\'Measurements\'/\'P" + f'{x:02d}' + "C" + f'{y:02d}' + "t\'"], df["/\'Measurements\'/\'P" + f'{x:02d}' + "C" + f'{y:02d}' + "z\'"]] \
+  for x in range (1,17) for y in range (1,17) \
+  if "/\'Measurements\'/\'P" + f'{x:02d}' + "C" + f'{y:02d}' + "r\'" in df \
+  and "/\'Measurements\'/\'P" + f'{x:02d}' + "C" + f'{y:02d}' + "t\'" in df \
+  and "/\'Measurements\'/\'P" + f'{x:02d}' + "C" + f'{y:02d}' + "z\'" in df])
+  # print(n_array)
+  t_array = torch.from_numpy(n_array)
+  # print(t_array)
+  
+  t_array.to("cuda") if torch.cuda.is_available() else t_array.to("cpu")
+
+  rtz_tensor = torch.linalg.vector_norm(t_array, ord=2, dim=1)
+
+
+  # print(f"Shape of rtz_tensor: {rtz_tensor.shape}")
+  # print(f"Datatype of rtz_tensor: {rtz_tensor.dtype}")
+  # print(f"Device rtz_tensor is stored on: {rtz_tensor.device}")
+
+  transpose_rtz_tensor = rtz_tensor.T
+
+  # print(f"Shape of transpose_rtz_tensor: {transpose_rtz_tensor.shape}")
+  # print(f"Datatype of transpose_rtz_tensor: {transpose_rtz_tensor.dtype}")
+  # print(f"Device transpose_rtz_tensor is stored on: {transpose_rtz_tensor.device}")
+
+
+  df2 = pd.DataFrame(transpose_rtz_tensor.numpy(), columns=rtz_list)
+  # print(df2)
+  result = pd.concat([df,df2], axis=1)
+
+  # print(result)
+
+  return result
+
+
 
 # graph the subset labels from the np.ndarray
 @timer_decorator
@@ -253,10 +307,10 @@ def compare_data(data1, data2, path_list=None) -> None:
 
 
 if __name__ == "__main__":
-  # print("ARGUMENTS PASSED:")
-  # for i, x in enumerate(sys.argv):
-  #   print("\t[" + str(i) + "] " + x)
-  # # passed arguments start at index 1
+  print("ARGUMENTS PASSED:")
+  for i, x in enumerate(sys.argv):
+    print("\t[" + str(i) + "] " + x)
+  # passed arguments start at index 1
   # print("Loading csv data...")
   # # data_list = [load_data_sensors(sys.argv[x]) for x in range(1, len(sys.argv))]
   # data_list = load_data_sensors("Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv")
@@ -272,15 +326,24 @@ if __name__ == "__main__":
   # graph_labels(data_list[0], ["MeasurementsCurrent"])
   # print("Finished graphing first data\'s current :)")
 
-  test = np.array([
-    [[1,2,3,4], [1,2,3,4], [1,2,3,4]],
-    [[1,2,3,4], [1,2,3,4], [1,2,3,4]]],
-    dtype=np.float
-  )
-  print(np.linalg.norm(test, axis=0))
+  # test = np.array([
+  #   [[1,2,3,4], [1,2,3,4], [1,2,3,4]],
+  #   [[1,2,3,4], [1,2,3,4], [1,2,3,4]]],
+  #   dtype=np.float
+  # )
+  # print(np.linalg.norm(test, axis=1))
 
-  test2 = torch.from_numpy(test)
+  # test2 = torch.from_numpy(test)
 
-  print(torch.linalg.norm(test2, dim=1, out=test2))
+  # print(torch.linalg.vector_norm(test2, ord=2, dim=1))
 
-  print(test)
+  # print(test)
+  from data_virtualization import virtualize
+  from data_normalization import normalize_min_max
+  df = virtualize(sys.argv[1])
+
+  # print(df)
+
+  df_rtz = PC_data_pandas(df)
+  df_rtz_normalized = normalize_min_max(df_rtz)
+  print(df_rtz_normalized)

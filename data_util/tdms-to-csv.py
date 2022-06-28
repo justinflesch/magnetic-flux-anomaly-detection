@@ -5,7 +5,7 @@ import pandas as pd
 import csv
 import os
 import sys
-import data_util.ampere_data
+# import data_util.ampere_data
 
 # Plotting.
 import matplotlib.pyplot as plt

@@ -1,11 +1,11 @@
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
-from data_util.data_virtualization import virtualize
+# from data_util.data_virtualization import virtualize
 
 import sys
 
-def normalize(df):
+def normalize(df: pd.DataFrame) -> pd.DataFrame:
     print("Beginning data normalization...")
     normalized_df = df.copy()
 
@@ -21,16 +21,19 @@ def normalize(df):
 
     return normalized_df
 
-def normalize_min_max(df, labels, normalize_labels):
+def normalize_min_max(df: pd.DataFrame, labels: list=None, normalize_labels: list=None):
     scaler = MinMaxScaler()
-
-    df_normalized = df[labels].copy()
-
-    df_normalized[normalize_labels] = scaler.fit_transform(df_normalized[normalize_labels])
-
-    return df_normalized
+    if labels:
+        df = df[labels].copy()
+    if normalize_labels:
+        df[normalize_labels] = scaler.fit_transform(df[normalize_labels])
+        return df
+    else:
+        df[df.columns] = scaler.fit_transform(df[df.columns])
+        return df
 
 if __name__ == "__main__":
+    from data_virtualization import virtualize
     print(sys.path)
     print("ARGUMENTS PASSED:")
     for i, x in enumerate(sys.argv):
