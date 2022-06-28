@@ -4,7 +4,17 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.tdms"
+            ]
+        },
         {
             "name": "Visualization",
             "type": "python",
@@ -46,6 +56,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
+                "Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.tdms"
             ]
         },
         {
@@ -55,7 +66,8 @@
             "program": "dtw\\Dynamic_Time_Warping.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv",
+            "args": [
+                "Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv",
                 "Capstone Data\\Combined---EQS-VAR3---09m-02d-20y_1s.csv"
             ]
         },
@@ -66,7 +78,8 @@
             "program": "rulsif\\agglom.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv",
+            "args": [
+                "Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv",
                 "Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv"
             ]
         },
@@ -77,11 +90,10 @@
             "program": "Covariance\\Covariance_Detection.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv",
+            "args": [
+                "Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv",
                 "Capstone Data\\Type A\\Combined---EQS-VAR3---09m-09d-20y_1s.csv"
             ]
         },
-
-
     ]
 }
